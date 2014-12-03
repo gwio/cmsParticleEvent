@@ -39,6 +39,27 @@ void Event::drawPoints() {
     meshPos2.draw();
 }
 
+void Event::updateCluster() {
+    
+    ofColor temp;
+    for (int i = 0; i < cluster.getNumVertices(); i++) {
+        temp = ofColor(255,255,255,clusterColor[i%255]);
+        cluster.setColor(i, temp);
+        clusterColor[i]+=2;
+    }
+}
+
+void Event::drawHERectHits() {
+    
+    heRect.ofMesh::drawWireframe();
+}
+
+void Event::drawCluster() {
+    
+    cluster.draw();
+}
+
+
 void Event::startAnimation() {
     
     for (int i = 0; i < vParticle.size(); i++) {

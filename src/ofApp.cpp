@@ -49,18 +49,24 @@ void ofApp::setup(){
     cam.lookAt(ofVec3f(0,0,0));
     
     light.setPosition(0,0,-200);
-    //ofEnableLighting();
+   // ofEnableLighting();
     ofEnableDepthTest();
     
+    tracks2.clear();
+    tracks2.setMode(OF_PRIMITIVE_POINTS);
+    
+    glPointSize(4);
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
     if (vEventData.size() > 0) {
         vEventData[vEventData.size()-1].updateParticle();
+        vEventData[vEventData.size()-1].updateCluster();
+
     }
     
-    cam.rotate(0.04, 0, 0, 1);
+   // cam.rotate(0.04, 0, 0, 1);
     
 }
 
@@ -76,27 +82,18 @@ void ofApp::draw(){
     ofSetColor(0);
     cam.begin();
     //light.enable();
-    /*
-     
-     float theta = ofDegToRad( 360/(vEventData.size()+1) );
-     for (int i = 0; i < vEventData.size(); i++) {
-     ofPushMatrix();
-     ofSetColor( ofColor::fromHsb(theta*i*10, 222, 222));
-     ofTranslate( sin(theta*i)*900, cos(theta*i)*900);
-     vEventData[i].draw();
-     ofPopMatrix();
-     }
-     
-     
-     
-     */
+    
     
     if (vEventData.size() > 0) {
         vEventData[vEventData.size()-1].drawCurves();
         //vEventData[vEventData.size()-1].drawPoints();
         vEventData[vEventData.size()-1].drawParticles();
-        
+        vEventData[vEventData.size()-1].drawHERectHits();
+        vEventData[vEventData.size()-1].drawCluster();
+
     }
+    
+    //tracks2.draw();
     cam.end();
     
 }
@@ -115,7 +112,11 @@ void ofApp::loadEvent(string _path) {
     tempE.vMeshPos2.clear();
     tempE.vMeshDir2.clear();
     
+    tempE.heRect.clear();
+    tempE.cluster.clear();
     
+    tempE.cluster.setMode(OF_PRIMITIVE_POINTS);
+    tempE.heRect.setMode(OF_PRIMITIVE_TRIANGLES);
     tempE.meshPos1.setMode(OF_PRIMITIVE_POINTS);
     tempE.meshPos2.setMode(OF_PRIMITIVE_POINTS);
     
@@ -124,10 +125,92 @@ void ofApp::loadEvent(string _path) {
     ofBuffer buffer = ofBufferFromFile(_path);
     int counter = 0;
     bool extraFound = false;
+    bool HERecHitsFound = false;
+    bool clusterFound = false;
     
-    while ( !buffer.isLastLine() && !extraFound ) {
+    while ( !buffer.isLastLine() && (!extraFound || !HERecHitsFound || !clusterFound) ) {
         string line = buffer.getNextLine();
         counter++;
+        
+        //get Clusters
+        
+        if  (  ofIsStringInString(line,"\"SiPixelClusters_V1\":") && !ofIsStringInString(line, "detid") )  {
+            bool isFirstLine = true;
+            clusterFound = true;
+            while (line != "]") {
+                if (isFirstLine) {
+                    line.erase(0,20);
+                    isFirstLine = false;
+                }
+                
+                
+                int i = 0;
+                while ((i = line.find_first_of( "()[]", i)) != std::string::npos) {
+                    line.erase(i, 1);
+                }
+                
+                vector<string> points = ofSplitString(line, ",");
+                
+                ofVec3f p1 = ofVec3f( ofToFloat(points[1]), ofToFloat(points[2]), ofToFloat(points[3]) );
+                tempE.cluster.addVertex(p1*EVENTSCALE);
+                tempE.cluster.addColor(ofColor::white);
+                tempE.clusterColor.push_back(ofRandom(255));
+                
+                
+                line = buffer.getNextLine();
+            }
+        }
+
+        //get HCAL Endcap Rect Hits
+        if  (  ofIsStringInString(line,"\"HERecHits_V2\":") && !ofIsStringInString(line, "energy") )  {
+            bool isFirstLine = true;
+            HERecHitsFound = true;
+            while (line != "]") {
+                if (isFirstLine) {
+                    line.erase(0,14);
+                    isFirstLine = false;
+                }
+                
+                
+                int i = 0;
+                while ((i = line.find_first_of( "()[]", i)) != std::string::npos) {
+                    line.erase(i, 1);
+                }
+                
+                vector<string> points = ofSplitString(line, ",");
+                
+                ofVec3f front1 = ofVec3f( ofToFloat(points[5]), ofToFloat(points[6]), ofToFloat(points[7]) );
+                tempE.heRect.addVertex(front1*EVENTSCALE);
+                tempE.heRect.addColor(ofColor::turquoise);
+                ofVec3f front2 = ofVec3f( ofToFloat(points[8]), ofToFloat(points[9]), ofToFloat(points[10]) );
+                tempE.heRect.addVertex(front2*EVENTSCALE);
+                tempE.heRect.addColor(ofColor::turquoise);
+                ofVec3f front3 = ofVec3f( ofToFloat(points[11]), ofToFloat(points[12]), ofToFloat(points[13]) );
+                tempE.heRect.addVertex(front3*EVENTSCALE);
+                tempE.heRect.addColor(ofColor::turquoise);
+                ofVec3f front4 = ofVec3f( ofToFloat(points[14]), ofToFloat(points[15]), ofToFloat(points[16]) );
+                tempE.heRect.addVertex(front4*EVENTSCALE);
+                tempE.heRect.addColor(ofColor::turquoise);
+                ofVec3f back1 = ofVec3f( ofToFloat(points[17]), ofToFloat(points[18]), ofToFloat(points[19]) );
+                tempE.heRect.addVertex(back1*EVENTSCALE);
+                tempE.heRect.addColor(ofColor::turquoise);
+                ofVec3f back2 = ofVec3f( ofToFloat(points[20]), ofToFloat(points[21]), ofToFloat(points[22]) );
+                tempE.heRect.addVertex(back2*EVENTSCALE);
+                tempE.heRect.addColor(ofColor::turquoise);
+                ofVec3f back3 = ofVec3f( ofToFloat(points[23]), ofToFloat(points[24]), ofToFloat(points[25]) );
+                tempE.heRect.addVertex(back3*EVENTSCALE);
+                tempE.heRect.addColor(ofColor::turquoise);
+                ofVec3f back4 = ofVec3f( ofToFloat(points[26]), ofToFloat(points[27]), ofToFloat(points[28]) );
+                tempE.heRect.addVertex(back4*EVENTSCALE);
+                tempE.heRect.addColor(ofColor::turquoise);
+                
+                
+                line = buffer.getNextLine();
+            }
+        }
+
+        
+        //get extras - curves
         if  (  ofIsStringInString(line,"\"Extras_V1\":") && !ofIsStringInString(line, "pos_1") )  {
             bool isFirstLine = true;
             extraFound = true;
@@ -172,6 +255,60 @@ void ofApp::loadEvent(string _path) {
         tempE.meshPos2.addColor(ofColor::red);
     }
     
+    //make index for HERect
+    for (int i = 0; i < tempE.heRect.getNumVertices(); i+=8) {
+        tempE.heRect.addIndex(i);
+        tempE.heRect.addIndex(i+1);
+        tempE.heRect.addIndex(i+2);
+
+        tempE.heRect.addIndex(i+2);
+        tempE.heRect.addIndex(i+3);
+        tempE.heRect.addIndex(i);
+
+        tempE.heRect.addIndex(i+4);
+        tempE.heRect.addIndex(i+5);
+        tempE.heRect.addIndex(i+6);
+        
+        tempE.heRect.addIndex(i+6);
+        tempE.heRect.addIndex(i+7);
+        tempE.heRect.addIndex(i+4);
+        
+        tempE.heRect.addIndex(i+1);
+        tempE.heRect.addIndex(i+5);
+        tempE.heRect.addIndex(i+6);
+
+        tempE.heRect.addIndex(i+6);
+        tempE.heRect.addIndex(i+2);
+        tempE.heRect.addIndex(i+1);
+        
+        tempE.heRect.addIndex(i+2);
+        tempE.heRect.addIndex(i+6);
+        tempE.heRect.addIndex(i+7);
+
+        tempE.heRect.addIndex(i+7);
+        tempE.heRect.addIndex(i+3);
+        tempE.heRect.addIndex(i+2);
+        
+        tempE.heRect.addIndex(i+3);
+        tempE.heRect.addIndex(i+7);
+        tempE.heRect.addIndex(i+4);
+
+        tempE.heRect.addIndex(i+4);
+        tempE.heRect.addIndex(i);
+        tempE.heRect.addIndex(i+3);
+
+        tempE.heRect.addIndex(i);
+        tempE.heRect.addIndex(i+4);
+        tempE.heRect.addIndex(i+5);
+
+        tempE.heRect.addIndex(i+5);
+        tempE.heRect.addIndex(i+1);
+        tempE.heRect.addIndex(i);
+
+
+
+
+    }
     
     for (int i = 0; i < tempE.vMeshPos1.size(); i++) {
         tempE.meshCurves.push_back( curveFomula(tempE.vMeshPos1[i]*EVENTSCALE, tempE.vMeshDir1[i]*EVENTSCALE, tempE.vMeshPos2[i]*EVENTSCALE, tempE.vMeshDir2[i]*EVENTSCALE));
@@ -210,7 +347,7 @@ ofPolyline ofApp::curveFomula(ofVec3f _a, ofVec3f _b, ofVec3f _c, ofVec3f _d) {
     
     ofPolyline temp;
     
-    int _stepIndex = 40;
+    int _stepIndex = 30;
     
     // FŸr Linie
     // Es kommt von Source Code iSPY.

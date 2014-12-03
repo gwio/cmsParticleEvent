@@ -55,6 +55,8 @@ class ofApp : public ofBaseApp{
    
     float pt, phi, eta;
     
+    ofMesh tracks2;
+    
     ofEasyCam cam;
     ofNode camNode;
    

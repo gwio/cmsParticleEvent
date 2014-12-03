@@ -19,6 +19,9 @@ public:
     
     void drawCurves();
     void drawPoints();
+    void drawHERectHits();
+    void drawCluster();
+    void updateCluster();
     void updateParticle();
     void startAnimation();
     void drawParticles();
@@ -28,7 +31,9 @@ public:
     ofVboMesh meshPos2;
     ofVboMesh meshDir2;
     
-    
+    ofVboMesh heRect;
+    ofVboMesh cluster;
+    vector<float> clusterColor;
     
     vector<ofVec3f> vMeshPos1;
     vector<ofVec3f> vMeshDir1;
