@@ -64,7 +64,10 @@ class ofApp : public ofBaseApp{
     float pointScale;
     float pointScaleDir = 50;
 
-    
+    bool useCurves;
+    bool useSiPixelCluster;
+    bool useHERecHits;
+    bool useEBRecHits;
     
     ofSpherePrimitive sphere;
     ofCylinderPrimitive cylinder;

@@ -51,9 +51,13 @@ void Event::updateCluster() {
 
 void Event::drawHERectHits() {
     
-    heRect.ofMesh::drawWireframe();
+    heRect.draw();
 }
 
+void Event::drawEBRectHits() {
+    
+    ebRect.draw();
+}
 void Event::drawCluster() {
     
     cluster.draw();

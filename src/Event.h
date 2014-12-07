@@ -20,6 +20,7 @@ public:
     void drawCurves();
     void drawPoints();
     void drawHERectHits();
+    void drawEBRectHits();
     void drawCluster();
     void updateCluster();
     void updateParticle();
@@ -32,6 +33,7 @@ public:
     ofVboMesh meshDir2;
     
     ofVboMesh heRect;
+    ofVboMesh ebRect;
     ofVboMesh cluster;
     vector<float> clusterColor;
     
