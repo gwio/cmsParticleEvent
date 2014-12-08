@@ -23,12 +23,11 @@ void ofApp::setup(){
     
     player.setBuffer(recordSample).loop(false).trigger(mainBang);
     
-    synth = synth + player;
     
-    synth = Reverb().input(synth).roomSize(0.4).wetLevel(0.5).dryLevel(0.5);
+    synth = Reverb().input(synth).roomSize(0.8).wetLevel(0.5).dryLevel(0.5);
     
     
-    mainOut.setOutputGen(synth*mainVol);
+  //  mainOut.setOutputGen(synth*mainVol);
     
     record = false;
     
@@ -78,11 +77,15 @@ void ofApp::update(){
         if(useHERecHits)
             vEventData[vEventData.size()-1].updateHERec();
         
-        
+        for (int i= 0; i < vEventData[vEventData.size()-1].vParticle.size(); i++) {
+           ofVec3f temp =  cam.worldToScreen( vEventData[vEventData.size()-1].vParticle[i].pos);
+            vEventData[vEventData.size()-1].vParticle[i].setStereo(ofMap(temp.x, -400, ofGetWidth()+400, -1.0, 1.0));
+            
+        }
     }
     
-     cam.rotate(0.04, 0, 0, 1);
-    
+   //  cam.rotate(0.04, 0, 0, 1);
+      
 }
 
 
@@ -120,6 +123,7 @@ void ofApp::draw(){
         
     }
     
+    ofDrawAxis(100);
     //tracks2.draw();
     cam.end();
     
@@ -353,8 +357,8 @@ void ofApp::loadEvent(string _path) {
             }
         }
     }
-    cout << tempE.vMeshPos1.size() << endl;
-    cout << counter << endl;
+   // cout << tempE.vMeshPos1.size() << endl;
+   // cout << counter << endl;
     
     
     //make mesh
@@ -494,12 +498,18 @@ void ofApp::loadEvent(string _path) {
     vEventData.push_back(tempE);
     
     
-    
+    Generator synth;
     for (int i = 0; i < vEventData[vEventData.size()-1].vParticle.size(); i++) {
-        synth = synth + vEventData[vEventData.size()-1].vParticle[i].toneOut;
+      synth = synth + vEventData[vEventData.size()-1].vParticle[i].toneOut;
     }
     
-    mainOut.setOutputGen(synth*0.8);
+    int vol = vEventData[vEventData.size()-1].vParticle.size();
+    cout << vol << endl;
+    
+   // mainOut.setOutputGen(synth* (1/vEventData[vEventData.size()-1].vParticle.size()));
+    
+    mainOut.setOutputGen(synth * 1.5/vol );
+
     
 }
 
@@ -632,7 +642,7 @@ void ofApp::saveRecord(){
         *lala++ = recordFloats[i];
     }
     
-    cout << "ready"<< endl;
+   // cout << "ready"<< endl;
     
 }
 

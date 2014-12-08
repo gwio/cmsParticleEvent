@@ -108,6 +108,7 @@ void Event::updateParticle() {
     
     for (int i = 0; i < vParticle.size(); i++) {
         vParticle[i].updateParticle();
+        vParticle[i].update();
     }
     
 }
