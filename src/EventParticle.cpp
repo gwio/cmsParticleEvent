@@ -10,7 +10,7 @@ void EventParticle::setup(ofVec3f _p, ofPolyline pl) {
     pos = _p;
     polyLine = pl;
     startAnim = false;
-    mInc = 0.30;
+    mInc = 0.030;
     polyVecPos = 0;
     vecPercent = 0.0;
     dir = pl.getVertices().at(1)-pos;
@@ -23,6 +23,7 @@ void EventParticle::setup(ofVec3f _p, ofPolyline pl) {
         farbe = ofColor::gold;
         
     }
+    
 }
 
 void EventParticle::linkSample(float* bufferPtr_, float bp_, bool slow, int grainSize, int ss_) {
@@ -49,15 +50,16 @@ void EventParticle::linkSample(float* bufferPtr_, float bp_, bool slow, int grai
     
     player.setBuffer(grain).loop(false).trigger(trigger);
     
-    
     //setting für kleines event < 2mb
-    toneOut = player*0.08;
-    toneOut = BPF12().Q(8).cutoff(bp_).input(player);
-    toneOut = StereoDelay(0.22,0.22).input(toneOut).wetLevel(0.8).delayTimeLeft(0.3).delayTimeRight(0.32);
     
+    toneOut = player*0.08;
+    toneOut = BPF12().Q(8).cutoff(bp_).input(toneOut);
+    toneOut = StereoDelay(0.22,0.22).input(toneOut).wetLevel(0.8).delayTimeLeft(0.3).delayTimeRight(0.32);
+
     //setting für grosses event > 3mb
     
-    // toneOut = player*0.008;
+  //  toneOut = toneOut*0.008;
+
     
     
 }

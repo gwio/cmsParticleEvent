@@ -75,9 +75,13 @@ void ofApp::update(){
         if(useSiPixelCluster)
             vEventData[vEventData.size()-1].updateCluster();
         
+        if(useHERecHits)
+            vEventData[vEventData.size()-1].updateHERec();
+        
+        
     }
     
-    // cam.rotate(0.04, 0, 0, 1);
+     cam.rotate(0.04, 0, 0, 1);
     
 }
 
@@ -242,6 +246,9 @@ void ofApp::loadEvent(string _path) {
                         tempE.ebRect.addVertex(dir4*EVENTSCALE);
                         tempE.ebRect.addColor(ofColor::tomato);
                         
+                        tempE.ebRectSize.push_back( (back1-front1).length() );
+
+                        
                     }
                     line = buffer.getNextLine();
                 }
@@ -301,6 +308,9 @@ void ofApp::loadEvent(string _path) {
                         ofVec3f dir4 = front4 + (back4-front4).normalize()*energy;
                         tempE.heRect.addVertex(dir4*EVENTSCALE);
                         tempE.heRect.addColor(ofColor::turquoise);
+                        
+                        tempE.heRectSize.push_back( (back1-front1).length() );
+
                         
                     }
                     
@@ -593,6 +603,7 @@ void ofApp::keyPressed(int key){
         
         if (vEventData.size() > 0) {
             vEventData[vEventData.size()-1].startAnimation();
+            vEventData[vEventData.size()-1].aniHERec = true;
         }
     }
     

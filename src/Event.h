@@ -20,12 +20,17 @@ public:
     void drawCurves();
     void drawPoints();
     void drawHERectHits();
+    void updateHERec();
     void drawEBRectHits();
+    void updateEBRec();
     void drawCluster();
     void updateCluster();
     void updateParticle();
     void startAnimation();
     void drawParticles();
+    
+    bool aniHERec;
+    bool aniEBRec;
     
     ofVboMesh meshPos1;
     ofVboMesh meshDir1;
@@ -33,7 +38,11 @@ public:
     ofVboMesh meshDir2;
     
     ofVboMesh heRect;
+    vector<float> heRectSize;
+    float hePercent;
+    
     ofVboMesh ebRect;
+    vector<float> ebRectSize;
     ofVboMesh cluster;
     vector<float> clusterColor;
     

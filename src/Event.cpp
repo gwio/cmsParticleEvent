@@ -3,6 +3,9 @@
 Event::Event() {
     
     vParticle.clear();
+    aniEBRec = false;
+    aniHERec = false;
+    hePercent = 0.1;
 }
 
 Event::Event(ofVboMesh mp1, ofVboMesh md1, ofVboMesh mp2, ofVboMesh md2, vector<ofPolyline> curves) {
@@ -15,6 +18,7 @@ Event::Event(ofVboMesh mp1, ofVboMesh md1, ofVboMesh mp2, ofVboMesh md2, vector<
     meshDir2 = md2;
     
     meshCurves = curves;
+    
 }
 
 
@@ -54,10 +58,37 @@ void Event::drawHERectHits() {
     heRect.draw();
 }
 
+void Event::updateHERec() {
+    
+    if ( aniHERec ) {
+        
+        for (int i = 0; i < heRect.getNumVertices(); i+=8) {
+            heRect.setVertex(i+4,  (heRect.getVertex(i) + ((heRect.getVertex(i+4)-heRect.getVertex(i)).normalize()*(heRectSize[i/8]*hePercent)) )  );
+            heRect.setVertex(i+5,  (heRect.getVertex(i+1) + ((heRect.getVertex(i+5)-heRect.getVertex(i+1)).normalize()*(heRectSize[i/8]*hePercent)) )  );
+            heRect.setVertex(i+6,  (heRect.getVertex(i+2) + ((heRect.getVertex(i+6)-heRect.getVertex(i+2)).normalize()*(heRectSize[i/8]*hePercent)) )  );
+            heRect.setVertex(i+7,  (heRect.getVertex(i+3) + ((heRect.getVertex(i+7)-heRect.getVertex(i+3)).normalize()*(heRectSize[i/8]*hePercent)) )  );
+
+        }
+        
+        hePercent*=1.1;
+        if (hePercent > 100.0) {
+            aniHERec = false;
+        }
+        
+    }
+}
+
 void Event::drawEBRectHits() {
     
     ebRect.draw();
 }
+
+
+void Event::updateEBRec() {
+    
+    
+}
+
 void Event::drawCluster() {
     
     cluster.draw();

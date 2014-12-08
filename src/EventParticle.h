@@ -38,4 +38,5 @@ public:
     
     float mInc;
     ofColor farbe;
+    
 };
