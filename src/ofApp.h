@@ -5,7 +5,6 @@
 #include "EventParticle.h"
 #include "ofxTonic.h"
 
-#define SAMPLESIZE 44100*6
 
 
 using namespace Tonic;
@@ -19,16 +18,7 @@ class ofApp : public ofBaseApp{
     RingBuffer recordBuffer;
     Generator synth;
     
-    float recordFloats[SAMPLESIZE];
-    
-    int recordPos;
-    bool record;
 
-    
-    vector<TonicFloat> sampleFloats;
-
-    float mainVol;
-    
 	public:
 		void setup();
 		void update();
@@ -50,16 +40,16 @@ class ofApp : public ofBaseApp{
     
     ofPolyline curveFomula( ofVec3f _a, ofVec3f _b, ofVec3f _c, ofVec3f _d );
     void loadEvent(string);
-
-    void saveRecord();
    
     float pt, phi, eta;
     
+    float easing(float,float);
     ofMesh tracks2;
     
     ofEasyCam cam;
     ofNode camNode;
    
+    float camDist;
     
     float pointScale;
     float pointScaleDir = 50;
@@ -77,6 +67,5 @@ class ofApp : public ofBaseApp{
     string last_event;
     
     ofLight light;
-    
     
 };

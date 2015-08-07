@@ -11,19 +11,19 @@ public:
     EventParticle();
     void setup(ofVec3f, ofPolyline);
     void update();
-    void linkSample(float*, float, bool, int, int);
     void setStereo(float);
+    void setVolume(float);
     
     float* bufferPtr;
     int sampleSize;
     
-    SampleTable grain;
-    BufferPlayer player;
     ofxTonicSynth synth;
     Generator toneOut;
-    ControlTrigger trigger;
     
-    SineWave sine;
+    RampedValue rampPan;
+    RampedValue rampVol;
+
+    
     float ranFreq;
     float baseFreq;
     float stereo;
@@ -41,7 +41,6 @@ public:
     
     void draw();
     void updateParticle();
-    void triggerSound();
     
     float mInc;
     ofColor farbe;

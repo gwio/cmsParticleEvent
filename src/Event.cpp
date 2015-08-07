@@ -10,7 +10,6 @@ Event::Event() {
 
 Event::Event(ofVboMesh mp1, ofVboMesh md1, ofVboMesh mp2, ofVboMesh md2, vector<ofPolyline> curves) {
     
-    
     meshPos1 = mp1;
     meshPos2 = mp2;
     
@@ -32,7 +31,6 @@ void Event::drawCurves() {
             ofSetColor(ofColor::mediumAquaMarine);
         }
         meshCurves[i].draw();
-        
     }
     ofPopStyle();
 }
@@ -67,7 +65,7 @@ void Event::updateHERec() {
             heRect.setVertex(i+5,  (heRect.getVertex(i+1) + ((heRect.getVertex(i+5)-heRect.getVertex(i+1)).normalize()*(heRectSize[i/8]*hePercent)) )  );
             heRect.setVertex(i+6,  (heRect.getVertex(i+2) + ((heRect.getVertex(i+6)-heRect.getVertex(i+2)).normalize()*(heRectSize[i/8]*hePercent)) )  );
             heRect.setVertex(i+7,  (heRect.getVertex(i+3) + ((heRect.getVertex(i+7)-heRect.getVertex(i+3)).normalize()*(heRectSize[i/8]*hePercent)) )  );
-
+            
         }
         
         hePercent*=1.1;
@@ -99,7 +97,6 @@ void Event::startAnimation() {
     
     for (int i = 0; i < vParticle.size(); i++) {
         vParticle[i].startAnim = true;
-        vParticle[i].triggerSound();
     }
     
 }

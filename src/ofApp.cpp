@@ -1,40 +1,23 @@
 #include "ofApp.h"
 #include <string>
 
+//global scale
 #define EVENTSCALE 400
-
 
 //--------------------------------------------------------------
 void ofApp::setup(){
     
     //use ig data?
     useCurves = true;
-    useSiPixelCluster = false;
+    useSiPixelCluster = true;
     useHERecHits =true;
     useEBRecHits = true;
+    
+    // ofDisableAntiAliasing();
     
     
     //setup tonic
     ofSoundStreamSetup(2, 2, this, 44100, 512, 4);
-    
-    mainVol = 0.5;
-    
-    recordSample = SampleTable(SAMPLESIZE);
-    
-    player.setBuffer(recordSample).loop(false).trigger(mainBang);
-    
-    
-    synth = Reverb().input(synth).roomSize(0.8).wetLevel(0.5).dryLevel(0.5);
-    
-    
-  //  mainOut.setOutputGen(synth*mainVol);
-    
-    record = false;
-    
-    for (int i = 0; i < SAMPLESIZE; i++) {
-        recordFloats[i] = 0.0;
-    }
-    
     
     //OF setup
     
@@ -50,8 +33,10 @@ void ofApp::setup(){
     
     last_event = "empty";
     
+    camDist = 200;
+    
     glPointSize(8);
-    cam.setPosition(0, 0, -200);
+    cam.setPosition(0, 0, camDist);
     cam.lookAt(ofVec3f(0,0,0));
     
     light.setPosition(0,0,-200);
@@ -61,7 +46,8 @@ void ofApp::setup(){
     tracks2.clear();
     tracks2.setMode(OF_PRIMITIVE_POINTS);
     
-    glPointSize(4);
+    glPointSize(1);
+    
 }
 
 //--------------------------------------------------------------
@@ -78,35 +64,69 @@ void ofApp::update(){
             vEventData[vEventData.size()-1].updateHERec();
         
         for (int i= 0; i < vEventData[vEventData.size()-1].vParticle.size(); i++) {
-           ofVec3f temp =  cam.worldToScreen( vEventData[vEventData.size()-1].vParticle[i].pos);
-            vEventData[vEventData.size()-1].vParticle[i].setStereo(ofMap(temp.x, -400, ofGetWidth()+400, -1.0, 1.0));
+            ofVec3f temp =  cam.worldToScreen( vEventData[vEventData.size()-1].vParticle[i].pos);
+            vEventData[vEventData.size()-1].vParticle[i].setStereo(ofMap(temp.x, -100, ofGetWidth()+100, -1.0, 1.0));
+            
+            temp = cam.getPosition() - vEventData[vEventData.size()-1].vParticle[i].pos;
+            float dist = temp.lengthSquared();
+            //cout << dist << endl;
+            vEventData[vEventData.size()-1].vParticle[i].setVolume(ofMap(dist, 100, 1110*950, 0.8, 0.0));
             
         }
     }
     
-   //  cam.rotate(0.04, 0, 0, 1);
-      
+    float tempTime = fmod(ofGetElapsedTimef()/6,1);
+    float alpha;
+    
+    if (tempTime < 0.5) {
+        alpha = ofMap(  easing(tempTime*2, 0.5), 0.0, 1.0, 0.0, PI);
+    } else {
+        alpha = ofMap(  easing( (tempTime-0.5)*2, 0.5), 0.0, 1.0, PI, TWO_PI);
+    }
+    
+    cam.setPosition(sin( alpha)*camDist,0, cos(alpha)*camDist);
+    cam.lookAt(ofVec3f(0,0,0));
+    cam.rotate(0.04, 0, 1, 0);
+    
+    cam.setFov(33);
+    
 }
 
 
-
+//------------------------------------------------
+float ofApp::easing (float x, float a){
+    
+    float epsilon = 0.00001;
+    float min_param_a = 0.0 + epsilon;
+    float max_param_a = 1.0 - epsilon;
+    a = min(max_param_a, max(min_param_a, a));
+    a = 1.0-a; // for sensible results
+    
+    float y = 0;
+    if (x<=0.5){
+        y = (pow(2.0*x, 1.0/a))/2.0;
+    } else {
+        y = 1.0 - (pow(2.0*(1.0-x), 1.0/a))/2.0;
+    }
+    return y;
+}
 //--------------------------------------------------------------
 void ofApp::draw(){
     ofBackgroundGradient( ofColor::whiteSmoke,ofColor::lightCyan);
-    ofDrawBitmapString(ofToString(ofGetFrameRate()), 20, 20);
-    ofDrawBitmapString(last_event, 20,40);
-    ofDrawBitmapString(ofToString(recordPos)+" / "+ofToString(SAMPLESIZE), 20,60);
+      ofDrawBitmapString(ofToString(ofGetFrameRate()), 20, 20);
+      ofDrawBitmapString(last_event, 20,40);
     
     ofSetColor(0);
+    //  post.begin(cam);
+    // ofBackground(ofColor::lightCyan);
     cam.begin();
     //light.enable();
-    
     
     if (vEventData.size() > 0) {
         
         if(useCurves)
             vEventData[vEventData.size()-1].drawCurves();
-        //vEventData[vEventData.size()-1].drawPoints();
+         vEventData[vEventData.size()-1].drawPoints();
         
         if(useCurves)
             vEventData[vEventData.size()-1].drawParticles();
@@ -123,8 +143,10 @@ void ofApp::draw(){
         
     }
     
-    ofDrawAxis(100);
+    
+    // ofDrawAxis(100);
     //tracks2.draw();
+    //  post.end();
     cam.end();
     
 }
@@ -152,7 +174,6 @@ void ofApp::loadEvent(string _path) {
     tempE.ebRect.setMode(OF_PRIMITIVE_TRIANGLES);
     tempE.meshPos1.setMode(OF_PRIMITIVE_POINTS);
     tempE.meshPos2.setMode(OF_PRIMITIVE_POINTS);
-    
     
     
     ofBuffer buffer = ofBufferFromFile(_path);
@@ -251,7 +272,7 @@ void ofApp::loadEvent(string _path) {
                         tempE.ebRect.addColor(ofColor::tomato);
                         
                         tempE.ebRectSize.push_back( (back1-front1).length() );
-
+                        
                         
                     }
                     line = buffer.getNextLine();
@@ -282,7 +303,7 @@ void ofApp::loadEvent(string _path) {
                     
                     if( ofToFloat(points[0]) > 0.75) {
                         float energy = ofToFloat(points[0])*0.125;
-
+                        
                         
                         ofVec3f front1 = ofVec3f( ofToFloat(points[5]), ofToFloat(points[6]), ofToFloat(points[7]) );
                         tempE.heRect.addVertex(front1*EVENTSCALE);
@@ -314,7 +335,7 @@ void ofApp::loadEvent(string _path) {
                         tempE.heRect.addColor(ofColor::turquoise);
                         
                         tempE.heRectSize.push_back( (back1-front1).length() );
-
+                        
                         
                     }
                     
@@ -357,8 +378,8 @@ void ofApp::loadEvent(string _path) {
             }
         }
     }
-   // cout << tempE.vMeshPos1.size() << endl;
-   // cout << counter << endl;
+    // cout << tempE.vMeshPos1.size() << endl;
+    // cout << counter << endl;
     
     
     //make mesh
@@ -473,7 +494,7 @@ void ofApp::loadEvent(string _path) {
         tempE.ebRect.addIndex(i);
         
     }
-
+    
     
     for (int i = 0; i < tempE.vMeshPos1.size(); i++) {
         tempE.meshCurves.push_back( curveFomula(tempE.vMeshPos1[i]*EVENTSCALE, tempE.vMeshDir1[i]*EVENTSCALE, tempE.vMeshPos2[i]*EVENTSCALE, tempE.vMeshDir2[i]*EVENTSCALE));
@@ -487,12 +508,10 @@ void ofApp::loadEvent(string _path) {
         float lphp = ofMap(i, 0, tempE.vMeshPos1.size(), 30, 9000);
         
         
-        int gSize =  SAMPLESIZE/2;
         
         bool isSlow;
         isSlow = true;
         
-        tempE.vParticle[i].linkSample(recordFloats, lphp, isSlow, gSize, SAMPLESIZE);
     }
     
     vEventData.push_back(tempE);
@@ -500,16 +519,18 @@ void ofApp::loadEvent(string _path) {
     
     Generator synth;
     for (int i = 0; i < vEventData[vEventData.size()-1].vParticle.size(); i++) {
-      synth = synth + vEventData[vEventData.size()-1].vParticle[i].toneOut;
+        synth = synth + vEventData[vEventData.size()-1].vParticle[i].toneOut;
     }
     
     int vol = vEventData[vEventData.size()-1].vParticle.size();
-    cout << vol << endl;
     
-   // mainOut.setOutputGen(synth* (1/vEventData[vEventData.size()-1].vParticle.size()));
     
-    mainOut.setOutputGen(synth * 1.5/vol );
-
+    Reverb rev = Reverb().roomSize(0.8).wetLevel(0.3).dryLevel(0.8).decayTime(0.23).inputHPFCutoff(5000);
+    
+  
+    
+    mainOut.setOutputGen(  (synth * (1.5/vol) ) >>rev );
+    
     
 }
 
@@ -518,7 +539,7 @@ ofPolyline ofApp::curveFomula(ofVec3f _a, ofVec3f _b, ofVec3f _c, ofVec3f _d) {
     
     ofPolyline temp;
     
-    int _stepIndex = 30;
+    int _stepIndex = 50;
     
     // FŸr Linie
     // Es kommt von Source Code iSPY.
@@ -589,24 +610,24 @@ void ofApp::keyPressed(int key){
     
     if (key == '1') {
         glPointSize(2);
-        cam.setPosition(0, 0, -1400);
-        cam.lookAt(ofVec3f(0,0,0));
+        camDist = 1400 ;
     }
     
     if (key == '2') {
         glPointSize(6);
-        cam.setPosition(0, 0, -700);
-        cam.lookAt(ofVec3f(0,0,0));
-        
+        camDist = 700;
         
         
     }
     
+    
+    if (key == 'F') {
+        ofToggleFullscreen();
+    }
+    
     if (key == '3') {
         glPointSize(8);
-        cam.setPosition(0, 0, -200);
-        cam.lookAt(ofVec3f(0,0,0));
-        
+        camDist = 200;
     }
     
     if (key == 's') {
@@ -628,23 +649,10 @@ void ofApp::keyPressed(int key){
         mainBang.trigger();
     }
     
-    if (key == 'r') {
-        recordPos =0;
-        record = true;
-    }
+
 }
 
-//_________________
-void ofApp::saveRecord(){
-    TonicFloat * lala = recordSample.dataPointer();
-    
-    for (int i =0; i < SAMPLESIZE; i++) {
-        *lala++ = recordFloats[i];
-    }
-    
-   // cout << "ready"<< endl;
-    
-}
+
 
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
@@ -692,17 +700,7 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 
 void ofApp::audioReceived(float* input, int bufferSize, int nChannels){
     
-    if (record) {
-        for (int i=0; i<bufferSize*nChannels; i++) {
-            if(recordPos<SAMPLESIZE) {
-                recordFloats[recordPos++] = input[i];
-            } else if(record){
-                record = false;
-                saveRecord();
-            }
-        }
-    }
-    
+
 }
 
 void ofApp::audioRequested (float * output, int bufferSize, int nChannels){
