@@ -84,9 +84,12 @@ void ofApp::update(){
         alpha = ofMap(  easing( (tempTime-0.5)*2, 0.5), 0.0, 1.0, PI, TWO_PI);
     }
     
-    cam.setPosition(sin( alpha)*camDist,0, cos(alpha)*camDist);
-    cam.lookAt(ofVec3f(0,0,0));
-    cam.rotate(0.04, 0, 1, 0);
+    
+    //autorotate
+    
+    //cam.setPosition(sin( alpha)*camDist,0, cos(alpha)*camDist);
+    //cam.lookAt(ofVec3f(0,0,0));
+    // cam.rotate(0.04, 0, 1, 0);
     
     cam.setFov(33);
     
@@ -113,20 +116,19 @@ float ofApp::easing (float x, float a){
 //--------------------------------------------------------------
 void ofApp::draw(){
     ofBackgroundGradient( ofColor::whiteSmoke,ofColor::lightCyan);
-      ofDrawBitmapString(ofToString(ofGetFrameRate()), 20, 20);
-      ofDrawBitmapString(last_event, 20,40);
+    // ofDrawBitmapString(ofToString(ofGetFrameRate()), 20, 20);
+    // ofDrawBitmapString(last_event, 20,40);
     
     ofSetColor(0);
     //  post.begin(cam);
     // ofBackground(ofColor::lightCyan);
     cam.begin();
     //light.enable();
-    
     if (vEventData.size() > 0) {
         
         if(useCurves)
             vEventData[vEventData.size()-1].drawCurves();
-         vEventData[vEventData.size()-1].drawPoints();
+        vEventData[vEventData.size()-1].drawPoints();
         
         if(useCurves)
             vEventData[vEventData.size()-1].drawParticles();
@@ -525,11 +527,11 @@ void ofApp::loadEvent(string _path) {
     int vol = vEventData[vEventData.size()-1].vParticle.size();
     
     
-    Reverb rev = Reverb().roomSize(0.8).wetLevel(0.3).dryLevel(0.8).decayTime(0.23).inputHPFCutoff(5000);
+    Reverb rev = Reverb().roomSize(0.8).wetLevel(0.3).dryLevel(0.8).decayTime(0.23);
     
-  
     
-    mainOut.setOutputGen(  (synth * (1.5/vol) ) >>rev );
+    
+    mainOut.setOutputGen(  (synth * (1.0/vol)*0.9 ) >>rev );
     
     
 }
@@ -649,7 +651,7 @@ void ofApp::keyPressed(int key){
         mainBang.trigger();
     }
     
-
+    
 }
 
 
@@ -700,7 +702,7 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 
 void ofApp::audioReceived(float* input, int bufferSize, int nChannels){
     
-
+    
 }
 
 void ofApp::audioRequested (float * output, int bufferSize, int nChannels){

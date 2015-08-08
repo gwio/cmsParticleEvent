@@ -6,7 +6,6 @@
 #include "ofxTonic.h"
 
 
-
 using namespace Tonic;
 
 class ofApp : public ofBaseApp{
@@ -17,8 +16,7 @@ class ofApp : public ofBaseApp{
     SampleTable recordSample, grainSample;
     RingBuffer recordBuffer;
     Generator synth;
-    
-
+       
 	public:
 		void setup();
 		void update();
