@@ -1,6 +1,6 @@
 #### cmsParticleEvent
 
-Visualisation and sonification study, 2014.
+Visualization and sonification study, 2014.
 
 openframeworks, ofxTonic, http://opendata.cern.ch/
 
